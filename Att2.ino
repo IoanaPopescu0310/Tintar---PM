@@ -5,6 +5,8 @@
 #define L1 2
 #define L2 3
 #define Buzz 4
+#define BTNT 5
+#define BTNB 6
 
 #if defined(ARDUINO_FEATHER_ESP32) // Feather Huzzah32
   #define TFT_CS         14
@@ -28,18 +30,25 @@
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
 float p = 3.1415926;
-int board[24];
+char board[24];
+char board_list[24][24];
 
 void setup(void) {
 
   pinMode(L1, OUTPUT);
   pinMode(L2, OUTPUT);
   pinMode(Buzz, OUTPUT);
+  pinMode(BTNT, INPUT);
+  pinMode(BTNB, INPUT);
     
   Serial.begin(9600);
   
   tft.initR(INITR_144GREENTAB);
-  memset(board, 0, 24 * sizeof(int));
+  memset(board, 0, 24 * sizeof(char));
+
+//  tftPrintTest();
+
+  delay(10000);
     
   printBoard(board);
 
@@ -139,23 +148,37 @@ void setup(void) {
 }
 
 void loop() {
+
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // # PLAYER 1 STAGE 1 MOVE
   Serial.println("AJUNG IN LOOP!!!!!!");
+  delay(100);
+  for(int i = 0; i < 24; i++)
+    Serial.print(board[i], DEC);
+  Serial.println("");
+
+
+
+
+
+
+  
     printBoard(board);
     bool userMoved = false;
     bool only3;
     int pos1;
-    int board_list[24][24];
-    memset(board_list, -1, sizeof(board_list));
-
     while (!userMoved) {
         bool movable = false;
+        Serial.println("Aici 3");
 
         if (numOfPieces(board, 1) == 3) {
             only3 = true;
         } else {
             only3 = false;
         }
+        Serial.println("Aici 4");
 
         while (!movable) {
           Serial.println("PLAYER 1: Which '1' piece will you move?: ");
@@ -164,25 +187,27 @@ void loop() {
           while (board[pos1] != 1) {
             Serial.println("Invalid. Try again.");
             Serial.println("PLAYER 1: Which '1' piece will you move?: ");
-            
+           
             pos1 = readPosition();
           }
-
           if (only3) {
             movable = true;
             Serial.println("Stage 3 for Player 1. Allowed to Fly");
+            Serial.println("Break");
             break;
           }
 
-          int* possibleMoves = adjacentLocations(pos1);
+          char* possibleMoves = adjacentLocations(pos1);
+          Serial.println("Adjencent pos");
 
           for (int adjpos = 0; adjpos < 4; ++adjpos) {
             if (possibleMoves[adjpos] != -1 && board[possibleMoves[adjpos]] == 0) {
               movable = true;
+              Serial.println("Break");
               break;
             }
           }
-
+          
           if (movable == false) {
             Serial.println("No empty adjacent pieces!");
           }
@@ -191,9 +216,8 @@ void loop() {
         bool userPlaced = false;
 
         while (!userPlaced){
-
         Serial.println("'1' New Position is : ");
-        
+  
         int newpos1 = readPosition();
 
         if(findElem(newpos1, adjacentLocations(pos1)) == true || only3) {
@@ -228,25 +252,28 @@ void loop() {
                 Serial.println("Only adjacent locations in Stage 2. Try again.");
           }
       }
-  }
+    }
 
-  possibleMoves_stage2or3(board, 1, board_list);
+//    possibleMoves_stage2or3(board, 1, board_list);
+    Serial.println("Possible moves!");
 
-  if(findPos(board_list) == 0) {
-        Serial.println("-----------\n");
-        Serial.println("    TIE    \n");
-        Serial.println("-----------\n");
-        exit(0);
-    } else if (numOfPieces(board, 2) < 3){
-      Serial.println("PLAYER 1 WINS\n");
-        tone(Buzz,150,300);
-        delay(500);
-        tone(Buzz, 300,900);
+    if(numOfPieces(board, 2) < 3){
+      printBoard(board);
+      tone(Buzz,150,300);
+      delay(500);
+      tone(Buzz, 300,900);
       exit(0);
     } else {
         printBoard(board);
-  }
+    }
 
+//  if(findPos(board_list) == 0) {
+//        Serial.println("-----------\n");
+//        Serial.println("    TIE    \n");
+//        Serial.println("-----------\n");
+//        Serial.println("Exit");
+//        exit(0);
+//    } 
   //////////////////////////////////////////////////////
 
    // # PLAYER 2 STAGE 2 MOVE
@@ -276,14 +303,16 @@ void loop() {
             if (only3){
                 movable = true;
                 Serial.println("Stage 3 for Player 2. Allowed to Fly\n");
+                Serial.println("Break");
                 break;
             }
 
-            int* possibleMoves = adjacentLocations(pos1);
+            char* possibleMoves = adjacentLocations(pos1);
 
             for (int adjpos = 0; adjpos < 4; ++adjpos) {
               if (possibleMoves[adjpos] != -1 && board[possibleMoves[adjpos]] == 0) {
                 movable = true;
+                Serial.println("Break");
                 break;
               }
             }
@@ -334,22 +363,25 @@ void loop() {
         }
     }
 
-    possibleMoves_stage2or3(board, 2, board_list);
-
-  if(findPos(board_list) == 0) {
-        Serial.println("-----------\n");
-        Serial.println("    TIE    \n");
-        Serial.println("-----------\n");
-        exit(0);
-    } else if (numOfPieces(board, 1) < 3){
-        Serial.println("PLAYER 2 WINS\n");
-        tone(Buzz,150,300);
-        delay(500);
-        tone(Buzz, 300,900);
-        exit(0);
-  } else {
+    if(numOfPieces(board, 1) < 3){
+      printBoard(board);
+      tone(Buzz,150,300);
+      delay(500);
+      tone(Buzz, 300,900);
+      exit(0);
+    } else {
         printBoard(board);
-  }
+    }
+
+//    possibleMoves_stage2or3(board, 2, board_list);
+//
+//  if(findPos(board_list) == 0) {
+//        Serial.println("-----------\n");
+//        Serial.println("    TIE    \n");
+//        Serial.println("-----------\n");
+//        Serial.println("Exit");
+//        exit(0);
+//    } 
   
 
 
@@ -362,6 +394,10 @@ int readPosition(){
   unsigned stringToInt;
 
   while(c0 == 55) {
+//    printBoard(board);
+    int btnText = digitalRead(BTNT);
+    int btnBoard = digitalRead(BTNB);
+    
     if(Serial.available() > 0){
       int inChar = Serial.read();
       if(isDigit(inChar))
@@ -370,40 +406,57 @@ int readPosition(){
         stringToInt = inString.toInt();
         return stringToInt;   
       }
-    }
+    } else if (btnText == HIGH) {
+          tftPrintText();
+      
+      } else if (btnBoard == HIGH) {
+          printBoard(board);
+      
+      }
   }
 }
 
-void printBoard(int board1[]){
+void printBoard(char board1[]){
+//  Serial.println("Print 1");
   tft.fillScreen(0xFEAD);
+//  Serial.println("Print 2");
   testdrawrects(ST77XX_BLACK);
+//  Serial.println("Print 3");
 
   //Up line
   for(int16_t i = 4; i <= 44; i++){
     tft.drawPixel(tft.width()/2, i, ST77XX_BLACK);
     delay(0);
   }
+//  Serial.println("Print 4");
   //Down line
-  for(int16_t i = tft.height() - 45; i <= tft.height()- 5; i++){
+  for(int8_t i = tft.height() - 45; i <= tft.height()- 5; i++){
+//    Serial.print("i: ");
+//    Serial.println(i);
     tft.drawPixel(tft.width()/2, i, ST77XX_BLACK);
     delay(0);
   }
+//  Serial.println("Print 5");
 
   //Left line
-  for(int16_t i = 4; i <= 44; i++){
+  for(int8_t i = 4; i <= 44; i++){
     tft.drawPixel(i, tft.height()/2, ST77XX_BLACK);
     delay(0);
   }
+//  Serial.println("Print 6");
 
    //Right line
-  for(int16_t i = tft.width() - 45; i <= tft.width() - 5; i++){
+  for(int8_t i = tft.width() - 45; i <= tft.width() - 5; i++){
     tft.drawPixel(i, tft.height()/2, ST77XX_BLACK);
     delay(0);
   }
+//  Serial.println("Print 7");
 
-  for(int16_t i = 0; i < 24; i++){
+  for(int8_t i = 0; i < 24; i++){
     drawPiecePos(i, board1[i]);
+    delay(0);
   }
+//  Serial.println("Print 8");
 }
 
 void drawPiece(uint16_t x, uint16_t y, uint16_t color) {
@@ -475,90 +528,90 @@ void drawPiecePos(uint16_t pos, uint16_t player){
   }
 }
 
-int* adjacentLocations(int pos){
+char* adjacentLocations(int pos){
   if(pos == 0){
-    static int res[] = {1,3,-1,-1};
+    static char res[] = {1,3,-1,-1};
     return res;
   } else if(pos == 1){
-    static int res[] = {0, 2, 9,-1};
+    static char res[] = {0, 2, 9,-1};
     return res;
   } else if(pos == 2){
-    static int res[] = {1, 4,-1,-1};
+    static char res[] = {1, 4,-1,-1};
     return res;
   } else if(pos == 3){
-    static int res[] = {0, 5, 11,-1};
+    static char res[] = {0, 5, 11,-1};
     return res;
   } else if(pos == 4){
-    static int res[] = {2, 7, 12,-1};
+    static char res[] = {2, 7, 12,-1};
     return res;
   } else if(pos == 5){
-    static int res[] = {3, 6,-1,-1};
+    static char res[] = {3, 6,-1,-1};
     return res;
   } else if(pos == 6){
-    static int res[] = {5, 7, 14,-1};
+    static char res[] = {5, 7, 14,-1};
     return res;
   } else if(pos == 7){
-    static int res[] = {4, 6,-1,-1};
+    static char res[] = {4, 6,-1,-1};
     return res;
   } else if(pos == 8){
-    static int res[] = {9, 11,-1,-1};
+    static char res[] = {9, 11,-1,-1};
     return res;
   } else if(pos == 9){
-    static int res[] = {1, 8, 10, 17};
+    static char res[] = {1, 8, 10, 17};
     return res;
   } else if(pos == 10){
-    static int res[] = {9, 12,-1,-1};
+    static char res[] = {9, 12,-1,-1};
     return res;
   } else if(pos == 11){
-    static int res[] = {3, 8, 13, 19};
+    static char res[] = {3, 8, 13, 19};
     return res;
   } else if(pos == 12){
-    static int res[] = {4, 10, 15, 20};
+    static char res[] = {4, 10, 15, 20};
     return res;
   } else if(pos == 13){
-    static int res[] = {11, 14,-1,-1};
+    static char res[] = {11, 14,-1,-1};
     return res;
   } else if(pos == 14){
-    static int res[] = {6, 13, 15, 22};
+    static char res[] = {6, 13, 15, 22};
     return res;
   } else if(pos == 15){
-    static int res[] = {12, 14,-1,-1};
+    static char res[] = {12, 14,-1,-1};
     return res;
   } else if(pos == 16){
-    static int res[] = {17, 19,-1,-1};
+    static char res[] = {17, 19,-1,-1};
     return res;
   } else if(pos == 17){
-    static int res[] = {9, 16, 18,-1};
+    static char res[] = {9, 16, 18,-1};
     return res;
   } else if(pos == 18){
-    static int res[] = {17, 20,-1,-1};
+    static char res[] = {17, 20,-1,-1};
     return res;
   } else if(pos == 19){
-    static int res[] = {11, 16, 21,-1};
+    static char res[] = {11, 16, 21,-1};
     return res;
   } else if(pos == 20){
-    static int res[] = {12, 18, 23,-1};
+    static char res[] = {12, 18, 23,-1};
     return res;
   } else if(pos == 21){
-    static int res[] = {19, 22,-1,-1};
+    static char res[] = {19, 22,-1,-1};
     return res;
   } else if(pos == 22){
-    static int res[] = {21, 23, 14,-1};
+    static char res[] = {21, 23, 14,-1};
     return res;
   } else if(pos == 23){
-    static int res[] = {20, 22,-1,-1};
+    static char res[] = {20, 22,-1,-1};
     return res;
   }
 }
 
 // # Function to check if 2 positions have the player on them
-bool isPlayer(int player, int board1[], int p1, int p2){
-  return (board1[p1] == player && board[p2] == player);
+bool isPlayer(int player, char board1[], int p1, int p2){
+  return (board1[p1] == player && board1[p2] == player);
 }
 
 // # Function to check if a player can make a mill in the next move.
 // # Return True if the player can create a mill
-bool checkNextMill(int position, int board1[], int player){
+bool checkNextMill(int position, char board1[], int player){
     bool mill[] = {
         (isPlayer(player, board1, 1, 2)   || isPlayer(player, board1, 3, 5)),
         (isPlayer(player, board1, 0, 2)   || isPlayer(player, board1, 9, 17)),
@@ -591,8 +644,8 @@ bool checkNextMill(int position, int board1[], int player){
 
 // # Return True if a player has a mill on the given position
 // # Each position has an index
-bool isMill(int position, int board1[]){
-    int p = board1[position];
+bool isMill(int position, char board1[]){
+    char p = board1[position];
 
     // # The player on that position
     if(p != 0){
@@ -605,7 +658,7 @@ bool isMill(int position, int board1[]){
 
 // # Function to return number of pieces owned by a player on the board.
 // # value is '1' or '2' (player number)
-int numOfPieces(int board1[], int value)
+int numOfPieces(char board1[], char value)
 /* checks array a for number of occurrances of value */{
   int i, count = 0;
   for (i = 0; i < 24; i++) {
@@ -617,7 +670,7 @@ int numOfPieces(int board1[], int value)
   return count;
 }
 
-int findPos(int board_list[24][24]) {
+char findPos(char board_list[24][24]) {
   int i = 0;
   for (i = 0; i < 24; ++i) {
     if(board_list[i][0] == -1)
@@ -627,15 +680,15 @@ int findPos(int board_list[24][24]) {
   return i;
 }
 
-void changeBoard(int board1[24], int board_list[24][24], int position) {
-  memcpy(board_list[position], board1, 24 * sizeof(int));
+void changeBoard(char board1[24], char board_list[24][24], int position) {
+  memcpy(board_list[position], board1, 24 * sizeof(char));
 }
 
 // # Function to remove a piece from the board.
 // # Takes a copy of the board, current positions,
 // # and player number as input.
 // # If the player is 1, then a piece of player 2 is removed, and vice versa
-void removePiece(int board_copy[24], int board_list[24][24], int player){
+void removePiece(char board_copy[24], char board_list[24][24], int player){
   int op;
 
   for (int i = 0; i < 24; ++i) {
@@ -646,11 +699,11 @@ void removePiece(int board_copy[24], int board_list[24][24], int player){
 
     if(board_copy[i] == op) {
       if(!isMill(i, board_copy)) {
-        int new_board[24];
-        memcpy(new_board, board_copy, 24 * sizeof(int));
+        char new_board[24];
+        memcpy(new_board, board_copy, 24 * sizeof(char));
         new_board[i] = 0;
 
-        int pos = findPos(board_list);
+        char pos = findPos(board_list);
         changeBoard(new_board, board_list, pos);
       }
     }
@@ -659,18 +712,18 @@ void removePiece(int board_copy[24], int board_list[24][24], int player){
 
 // # Generating all possible moves for stage 2 of the game
 // # That is, when both players have placed all their pieces
-void possibleMoves_stage2(int board1[24], int player, int board_list[24][24]){
+void possibleMoves_stage2(char board1[24], int player, char board_list[24][24]){
 
   for (int i = 0; i < 24; ++i) {
         if (board1[i] == player){
-            int* adjacent_list = adjacentLocations(i);
+            char* adjacent_list = adjacentLocations(i);
 
             for (int pos = 0; pos < 4; ++pos) {
                 if (board1[adjacent_list[pos]] == 0){
                     // # If the location is empty, then the piece can move there
                     // # Hence, generating all possible combinations
-                    int board_copy[24];
-                    memcpy(board_copy, board1, 24 * sizeof(int));
+                    char board_copy[24];
+                    memcpy(board_copy, board1, 24 * sizeof(char));
                     // # Emptying the current location, moving the piece to new position
                     board_copy[pos] = player;
 
@@ -678,7 +731,7 @@ void possibleMoves_stage2(int board1[24], int player, int board_list[24][24]){
                         // # in case of mill, remove Piece
                         removePiece(board_copy, board_list, player);
                     } else{
-                      int pos = findPos(board_list);
+                      char pos = findPos(board_list);
                       changeBoard(board_copy, board_list, pos);
                     }
                 }
@@ -689,13 +742,13 @@ void possibleMoves_stage2(int board1[24], int player, int board_list[24][24]){
 
 // # Generating all possible moves for stage 3 of the game
 // # That is, when one player has only 3 pieces
-void possibleMoves_stage3(int board1[24], int player, int board_list[24][24]){
+void possibleMoves_stage3(char board1[24], int player, char board_list[24][24]){
   for (int i = 0; i < 24; ++i) {
         if (board1[i] == player) {
           for (int j = 0; j < 24; ++j){
                 if (board1[j] == 0){
-                    int board_copy[24];
-                    memcpy(board_copy, board1, 24 * sizeof(int));
+                    char board_copy[24];
+                    memcpy(board_copy, board1, 24 * sizeof(char));
 
                     // # The piece can fly to any empty position, not only adjacent ones
                     // # So, generating all possible positions for the pieces
@@ -706,7 +759,7 @@ void possibleMoves_stage3(int board1[24], int player, int board_list[24][24]){
                         // # If a Mill is formed, remove piece
                         removePiece(board_copy, board_list, player);
                     } else{
-                        int pos = findPos(board_list);
+                        char pos = findPos(board_list);
                         changeBoard(board_copy, board_list, pos);
                     }
                 }
@@ -717,8 +770,8 @@ void possibleMoves_stage3(int board1[24], int player, int board_list[24][24]){
 
 // # Checks if game is in stage 2 or 3
 // # Returns possible moves accordingly
-void possibleMoves_stage2or3(int board1[24], int player, int board_list[24][24]){
-  memset(board_list, -1, 576 * sizeof(int));
+void possibleMoves_stage2or3(char board1[24], int player, char board_list[24][24]){
+  memset(board_list, -1, 576 * sizeof(char));
     if (numOfPieces(board1, player) == 3){
         possibleMoves_stage3(board1, player, board_list);
     }
@@ -727,7 +780,7 @@ void possibleMoves_stage2or3(int board1[24], int player, int board_list[24][24])
     }
 }
 
-bool findElem(int pos1, int neighbors[]){
+bool findElem(int pos1, char neighbors[]){
   for (int i = 0; i < 4; ++i)
   {
     if(neighbors[i] == pos1)
@@ -735,4 +788,30 @@ bool findElem(int pos1, int neighbors[]){
   }
 
   return false;
+}
+
+
+void tftPrintText() {
+  tft.setTextWrap(true);
+  tft.fillScreen(0xFEAD);
+  tft.setCursor(5, 5);
+  tft.setTextColor(ST77XX_BLACK);
+  tft.setTextSize(1);
+  tft.println("00-------01-------02");
+  tft.println(" |        |        |");
+  tft.println(" |  08----09----10 |");
+  tft.println(" |  |     |     |  |");
+  tft.println(" |  |  16-17-18 |  |");
+  tft.println(" |  |  |     |  |  |");
+  tft.println(" |  |  |     |  |  |");
+  tft.println("03--11-19   20-12--04");
+  tft.println(" |  |  |     |  |  |");
+  tft.println(" |  |  |     |  |  |");
+  tft.println(" |  |  21-22-23 |  |");
+  tft.println(" |  |     |     |  |");
+  tft.println(" |  13----14----15 |");
+  tft.println(" |        |        |");
+  tft.println("05-------06-------07");
+  
+  
 }
