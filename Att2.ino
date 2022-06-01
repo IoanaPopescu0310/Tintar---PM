@@ -50,7 +50,7 @@ void setup(void) {
 
   ///////////////////////////////////////////////////////////////////
 
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 9; ++i) {
         // # FOR PLAYER 1, STAGE 1
         digitalWrite(L1, HIGH);
         digitalWrite(L2, LOW);
