@@ -45,16 +45,12 @@ void setup(void) {
   
   tft.initR(INITR_144GREENTAB);
   memset(board, 0, 24 * sizeof(char));
-
-//  tftPrintTest();
-
-  delay(10000);
-    
+  
   printBoard(board);
 
   ///////////////////////////////////////////////////////////////////
 
-  for (int i = 0; i < 9; ++i) {
+  for (int i = 0; i < 4; ++i) {
         // # FOR PLAYER 1, STAGE 1
         digitalWrite(L1, HIGH);
         digitalWrite(L2, LOW);
@@ -152,18 +148,7 @@ void loop() {
 
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// # PLAYER 1 STAGE 1 MOVE
-  Serial.println("AJUNG IN LOOP!!!!!!");
-  delay(100);
-  for(int i = 0; i < 24; i++)
-    Serial.print(board[i], DEC);
-  Serial.println("");
-
-
-
-
-
-
+// # PLAYER 1 STAGE 2 MOVE
   
     printBoard(board);
     bool userMoved = false;
@@ -171,14 +156,14 @@ void loop() {
     int pos1;
     while (!userMoved) {
         bool movable = false;
-        Serial.println("Aici 3");
+        digitalWrite(L1, HIGH);
+        digitalWrite(L2, LOW);
 
         if (numOfPieces(board, 1) == 3) {
             only3 = true;
         } else {
             only3 = false;
         }
-        Serial.println("Aici 4");
 
         while (!movable) {
           Serial.println("PLAYER 1: Which '1' piece will you move?: ");
@@ -193,17 +178,14 @@ void loop() {
           if (only3) {
             movable = true;
             Serial.println("Stage 3 for Player 1. Allowed to Fly");
-            Serial.println("Break");
             break;
           }
 
           char* possibleMoves = adjacentLocations(pos1);
-          Serial.println("Adjencent pos");
 
           for (int adjpos = 0; adjpos < 4; ++adjpos) {
             if (possibleMoves[adjpos] != -1 && board[possibleMoves[adjpos]] == 0) {
               movable = true;
-              Serial.println("Break");
               break;
             }
           }
@@ -255,25 +237,28 @@ void loop() {
     }
 
 //    possibleMoves_stage2or3(board, 1, board_list);
-    Serial.println("Possible moves!");
 
     if(numOfPieces(board, 2) < 3){
       printBoard(board);
-      tone(Buzz,150,300);
+      tone(Buzz,150);
       delay(500);
-      tone(Buzz, 300,900);
+      tone(Buzz, 300);
+      delay(1000);
+      noTone(Buzz);
       exit(0);
     } else {
         printBoard(board);
     }
 
-//  if(findPos(board_list) == 0) {
-//        Serial.println("-----------\n");
-//        Serial.println("    TIE    \n");
-//        Serial.println("-----------\n");
-//        Serial.println("Exit");
-//        exit(0);
-//    } 
+/*  if(findPos(board_list) == 0) {
+        Serial.println("-----------\n");
+        Serial.println("    TIE    \n");
+        Serial.println("-----------\n");
+        Serial.println("Exit");
+        exit(0);
+    } 
+*/
+
   //////////////////////////////////////////////////////
 
    // # PLAYER 2 STAGE 2 MOVE
@@ -281,6 +266,8 @@ void loop() {
     userMoved = false;
     while (!userMoved){
         bool movable = false;
+        digitalWrite(L1, LOW);
+        digitalWrite(L2, HIGH);
 
         if (numOfPieces(board, 2) == 3){
             only3 = true;
@@ -303,7 +290,6 @@ void loop() {
             if (only3){
                 movable = true;
                 Serial.println("Stage 3 for Player 2. Allowed to Fly\n");
-                Serial.println("Break");
                 break;
             }
 
@@ -312,7 +298,6 @@ void loop() {
             for (int adjpos = 0; adjpos < 4; ++adjpos) {
               if (possibleMoves[adjpos] != -1 && board[possibleMoves[adjpos]] == 0) {
                 movable = true;
-                Serial.println("Break");
                 break;
               }
             }
@@ -339,7 +324,7 @@ void loop() {
                         while (!userRemoved){
                             printBoard(board);
 
-                            Serial.println("Mill Formed. Remove a '2' piece: ");
+                            Serial.println("Mill Formed. Remove a '1' piece: ");
 
                             int removepos1 = readPosition();
 
@@ -373,18 +358,16 @@ void loop() {
         printBoard(board);
     }
 
-//    possibleMoves_stage2or3(board, 2, board_list);
-//
-//  if(findPos(board_list) == 0) {
-//        Serial.println("-----------\n");
-//        Serial.println("    TIE    \n");
-//        Serial.println("-----------\n");
-//        Serial.println("Exit");
-//        exit(0);
-//    } 
-  
+/*    possibleMoves_stage2or3(board, 2, board_list);
 
-
+  if(findPos(board_list) == 0) {
+        Serial.println("-----------\n");
+        Serial.println("    TIE    \n");
+        Serial.println("-----------\n");
+        Serial.println("Exit");
+        exit(0);
+    } 
+*/
 }
 
 int readPosition(){
@@ -394,7 +377,6 @@ int readPosition(){
   unsigned stringToInt;
 
   while(c0 == 55) {
-//    printBoard(board);
     int btnText = digitalRead(BTNT);
     int btnBoard = digitalRead(BTNB);
     
@@ -417,46 +399,37 @@ int readPosition(){
 }
 
 void printBoard(char board1[]){
-//  Serial.println("Print 1");
   tft.fillScreen(0xFEAD);
-//  Serial.println("Print 2");
   testdrawrects(ST77XX_BLACK);
-//  Serial.println("Print 3");
 
   //Up line
   for(int16_t i = 4; i <= 44; i++){
     tft.drawPixel(tft.width()/2, i, ST77XX_BLACK);
     delay(0);
   }
-//  Serial.println("Print 4");
+
   //Down line
   for(int8_t i = tft.height() - 45; i <= tft.height()- 5; i++){
-//    Serial.print("i: ");
-//    Serial.println(i);
     tft.drawPixel(tft.width()/2, i, ST77XX_BLACK);
     delay(0);
   }
-//  Serial.println("Print 5");
 
   //Left line
   for(int8_t i = 4; i <= 44; i++){
     tft.drawPixel(i, tft.height()/2, ST77XX_BLACK);
     delay(0);
   }
-//  Serial.println("Print 6");
 
    //Right line
   for(int8_t i = tft.width() - 45; i <= tft.width() - 5; i++){
     tft.drawPixel(i, tft.height()/2, ST77XX_BLACK);
     delay(0);
   }
-//  Serial.println("Print 7");
 
   for(int8_t i = 0; i < 24; i++){
     drawPiecePos(i, board1[i]);
     delay(0);
   }
-//  Serial.println("Print 8");
 }
 
 void drawPiece(uint16_t x, uint16_t y, uint16_t color) {
@@ -528,6 +501,7 @@ void drawPiecePos(uint16_t pos, uint16_t player){
   }
 }
 
+// All neighbors for the given position
 char* adjacentLocations(int pos){
   if(pos == 0){
     static char res[] = {1,3,-1,-1};
@@ -610,7 +584,6 @@ bool isPlayer(int player, char board1[], int p1, int p2){
 }
 
 // # Function to check if a player can make a mill in the next move.
-// # Return True if the player can create a mill
 bool checkNextMill(int position, char board1[], int player){
     bool mill[] = {
         (isPlayer(player, board1, 1, 2)   || isPlayer(player, board1, 3, 5)),
@@ -643,11 +616,9 @@ bool checkNextMill(int position, char board1[], int player){
 }
 
 // # Return True if a player has a mill on the given position
-// # Each position has an index
 bool isMill(int position, char board1[]){
     char p = board1[position];
 
-    // # The player on that position
     if(p != 0){
         // # If there is some player on that position
         return checkNextMill(position, board1, p);
@@ -656,10 +627,8 @@ bool isMill(int position, char board1[]){
         return false;
 }
 
-// # Function to return number of pieces owned by a player on the board.
-// # value is '1' or '2' (player number)
-int numOfPieces(char board1[], char value)
-/* checks array a for number of occurrances of value */{
+// # Function to return number of pieces owned by a player on the board
+int numOfPieces(char board1[], char value) {
   int i, count = 0;
   for (i = 0; i < 24; i++) {
     if (board1[i] == value) {
@@ -684,10 +653,6 @@ void changeBoard(char board1[24], char board_list[24][24], int position) {
   memcpy(board_list[position], board1, 24 * sizeof(char));
 }
 
-// # Function to remove a piece from the board.
-// # Takes a copy of the board, current positions,
-// # and player number as input.
-// # If the player is 1, then a piece of player 2 is removed, and vice versa
 void removePiece(char board_copy[24], char board_list[24][24], int player){
   int op;
 
@@ -711,7 +676,6 @@ void removePiece(char board_copy[24], char board_list[24][24], int player){
 }
 
 // # Generating all possible moves for stage 2 of the game
-// # That is, when both players have placed all their pieces
 void possibleMoves_stage2(char board1[24], int player, char board_list[24][24]){
 
   for (int i = 0; i < 24; ++i) {
@@ -721,10 +685,8 @@ void possibleMoves_stage2(char board1[24], int player, char board_list[24][24]){
             for (int pos = 0; pos < 4; ++pos) {
                 if (board1[adjacent_list[pos]] == 0){
                     // # If the location is empty, then the piece can move there
-                    // # Hence, generating all possible combinations
                     char board_copy[24];
                     memcpy(board_copy, board1, 24 * sizeof(char));
-                    // # Emptying the current location, moving the piece to new position
                     board_copy[pos] = player;
 
                     if (isMill(pos, board_copy)){
@@ -741,7 +703,6 @@ void possibleMoves_stage2(char board1[24], int player, char board_list[24][24]){
 }
 
 // # Generating all possible moves for stage 3 of the game
-// # That is, when one player has only 3 pieces
 void possibleMoves_stage3(char board1[24], int player, char board_list[24][24]){
   for (int i = 0; i < 24; ++i) {
         if (board1[i] == player) {
@@ -749,14 +710,11 @@ void possibleMoves_stage3(char board1[24], int player, char board_list[24][24]){
                 if (board1[j] == 0){
                     char board_copy[24];
                     memcpy(board_copy, board1, 24 * sizeof(char));
-
                     // # The piece can fly to any empty position, not only adjacent ones
-                    // # So, generating all possible positions for the pieces
                     board_copy[i] = 0;
                     board_copy[j] = player;
 
                     if (isMill(j, board_copy)){
-                        // # If a Mill is formed, remove piece
                         removePiece(board_copy, board_list, player);
                     } else{
                         char pos = findPos(board_list);
@@ -769,7 +727,6 @@ void possibleMoves_stage3(char board1[24], int player, char board_list[24][24]){
 }
 
 // # Checks if game is in stage 2 or 3
-// # Returns possible moves accordingly
 void possibleMoves_stage2or3(char board1[24], int player, char board_list[24][24]){
   memset(board_list, -1, 576 * sizeof(char));
     if (numOfPieces(board1, player) == 3){
